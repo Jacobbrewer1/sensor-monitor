@@ -19,9 +19,7 @@ gazelle(
 
 write_source_files(
     name = "gen_openapi",
-    additional_update_targets = [
-        "//cmd/api/api/openapi:gen_openapi",
-    ],
+    additional_update_targets = [],
 )
 
 write_source_files(
