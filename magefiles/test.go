@@ -37,7 +37,6 @@ func (Test) Unit() error {
 	return nil
 }
 
-// Bench runs benchmarks for the repository.
 func (Test) Bench() error {
 	mg.Deps(Init)
 	got, err := benchmark()
@@ -49,7 +48,6 @@ func (Test) Bench() error {
 	return nil
 }
 
-// benchmark executes the benchmarks for the repository and returns the output.
 func benchmark() (string, error) {
 	mg.Deps(Init)
 	log(slog.LevelInfo, "Running benchmarks")
