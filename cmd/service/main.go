@@ -35,7 +35,7 @@ func readCPUTemp() (float64, error) {
 
 func notifyUser(currentTemp float64) error {
 	if currentTemp >= crashTemperature {
-		if err := beeep.Notify(
+		if err := beeep.Alert(
 			"🔥 CPU Temperature Critical!",
 			fmt.Sprintf("CPU has reached %.1f°C — system will crash soon!", currentTemp),
 			"",
@@ -57,12 +57,12 @@ func notifyUser(currentTemp float64) error {
 	return nil
 }
 
-func shouldNotify(currentTemp, lastTemp float64) bool {
+func shouldNotify(currentTemp, lastTemp, crashTemp float64) bool {
 	if lastTemp == 0 {
 		return false // No previous temperature to compare
 	}
 
-	crashWorryThreshold := crashTemperature * 0.85 // 85% of crash temperature
+	crashWorryThreshold := crashTemp * 0.85 // 85% of crash temperature
 	if currentTemp < crashWorryThreshold {
 		return false // Current temperature is below the threshold for concern
 	}
@@ -71,7 +71,7 @@ func shouldNotify(currentTemp, lastTemp float64) bool {
 	threshold := lastTemp * 1.05 // 5% increase from the last temperature
 
 	// Notify if the current temperature is significantly higher than the last recorded temperature
-	return currentTemp > threshold || currentTemp >= crashTemperature
+	return currentTemp > threshold || currentTemp >= crashTemp
 }
 
 func main() {
@@ -91,7 +91,7 @@ func main() {
 			continue
 		}
 
-		if shouldNotify(temp, lastTemp) {
+		if shouldNotify(temp, lastTemp, crashTemperature) {
 			if err := notifyUser(temp); err != nil {
 				fmt.Printf("Error sending notification: %v\n", err)
 				return

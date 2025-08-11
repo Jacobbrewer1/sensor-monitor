@@ -5,6 +5,9 @@ git.sr.ht/~jackmordaunt/go-toast/internal/winrt/data/xml/dom
 git.sr.ht/~jackmordaunt/go-toast/internal/winrt/ui/notifications
 git.sr.ht/~jackmordaunt/go-toast/tmpl
 git.sr.ht/~jackmordaunt/go-toast/wintoast
+# github.com/davecgh/go-spew v1.1.1
+## explicit
+github.com/davecgh/go-spew/spew
 # github.com/esiqveland/notify v0.13.3
 ## explicit; go 1.13
 github.com/esiqveland/notify
@@ -27,6 +30,9 @@ github.com/magefile/mage/sh
 # github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 ## explicit
 github.com/nfnt/resize
+# github.com/pmezard/go-difflib v1.0.0
+## explicit
+github.com/pmezard/go-difflib/difflib
 # github.com/sergeymakinen/go-bmp v1.0.0
 ## explicit; go 1.13
 github.com/sergeymakinen/go-bmp
@@ -34,6 +40,10 @@ github.com/sergeymakinen/go-bmp
 ## explicit; go 1.17
 github.com/sergeymakinen/go-ico
 github.com/sergeymakinen/go-ico/internal/icondir
+# github.com/stretchr/testify v1.9.0
+## explicit; go 1.17
+github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
 # github.com/tadvi/systray v0.0.0-20190226123456-11a2b8fa57af
 ## explicit
 github.com/tadvi/systray
@@ -47,3 +57,6 @@ golang.org/x/sys/windows/registry
 # gopkg.in/yaml.v2 v2.4.0
 ## explicit; go 1.15
 gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.1
+## explicit
+gopkg.in/yaml.v3
