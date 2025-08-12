@@ -24,6 +24,7 @@ func PrettyName(name string) string {
 
 	// Replace underscores with spaces and capitalize the first letter of each word
 	name = strings.ReplaceAll(name, "_", " ")
+	name = strings.ReplaceAll(name, "-", " ")
 	name = cases.Title(language.English).String(name)
 
 	return name

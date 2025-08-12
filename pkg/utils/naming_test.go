@@ -18,6 +18,7 @@ func TestPrettyName(t *testing.T) {
 		{"Underscores", "sensor_name", "Sensor Name"},
 		{"Mixed case", "sensorName", "Sensor Name"},
 		{"Multiple underscores", "sensor_name_test", "Sensor Name Test"},
+		{"Multiple underscores", "sensor-name-test", "Sensor Name Test"},
 		{"Leading and trailing spaces", "  sensor_name  ", "Sensor Name"},
 		{"Already pretty", "Sensor Name", "Sensor Name"},
 	}
