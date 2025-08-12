@@ -1,25 +1,27 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library", "go_test")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
 
 go_library(
     name = "monitor_lib",
     srcs = [
-        "common.go",
+        "cpu.go",
         "main.go",
+        "notify.go",
     ],
     importpath = "github.com/jacobbrewer1/sensor-monitor/cmd/monitor",
     visibility = ["//visibility:private"],
-    deps = ["@com_github_gen2brain_beeep//:beeep"],
+    deps = [
+        "//pkg/alerts",
+        "//pkg/sensors",
+        "//pkg/utils",
+        "@com_github_caarlos0_env_v10//:env",
+        "@com_github_gen2brain_beeep//:beeep",
+        "@com_github_jacobbrewer1_web//:web",
+        "@com_github_jacobbrewer1_web//logging",
+    ],
 )
 
 go_binary(
     name = "monitor",
     embed = [":monitor_lib"],
     visibility = ["//visibility:public"],
-)
-
-go_test(
-    name = "monitor_test",
-    srcs = ["main_test.go"],
-    embed = [":monitor_lib"],
-    deps = ["@com_github_stretchr_testify//require"],
 )

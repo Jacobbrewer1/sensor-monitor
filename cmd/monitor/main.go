@@ -1,106 +1,113 @@
 package main
 
 import (
-	"encoding/json"
+	"context"
+	"errors"
 	"fmt"
-	"os/exec"
-	"strings"
+	"log/slog"
 	"time"
 
+	"github.com/caarlos0/env/v10"
 	"github.com/gen2brain/beeep"
+
+	"github.com/jacobbrewer1/sensor-monitor/pkg/alerts"
+	"github.com/jacobbrewer1/sensor-monitor/pkg/sensors"
+	"github.com/jacobbrewer1/sensor-monitor/pkg/utils"
+	"github.com/jacobbrewer1/web"
+	"github.com/jacobbrewer1/web/logging"
 )
 
 const (
-	// appName is the name of the application used for notifications.
-	appName = "CPU Temp Monitor"
-
-	// crashTemperature is the temperature in Celsius at which the system is considered to be in a critical state.
-	crashTemperature = 100.0 // Temperature in Celsius at which the system crashes
+	// appName is the name of the application.
+	appName = "sensor-monitor"
 )
 
-func readCPUTemp() (float64, error) {
-	cmd := exec.Command("sensors", "-j")
-	output, err := cmd.Output()
+type (
+	// AppConfig holds the application configuration.
+	AppConfig struct{}
+
+	// App is the main application structure.
+	App struct {
+		base *web.App
+		cfg  *AppConfig
+
+		tempChan <-chan map[int]float64
+		errChan  <-chan error
+		alerter  alerts.Alerter
+	}
+)
+
+// NewApp creates a new instance of App.
+func NewApp(l *slog.Logger) (*App, error) {
+	base, err := web.NewApp(l)
 	if err != nil {
-		return 0, fmt.Errorf("failed to execute sensors command: %w", err)
+		return nil, fmt.Errorf("could not create new web app: %w", err)
 	}
 
-	sensorData := new(sensor)
-	if err := json.NewDecoder(strings.NewReader(string(output))).Decode(sensorData); err != nil {
-		return 0, fmt.Errorf("failed to decode sensors output: %w", err)
+	cfg := new(AppConfig)
+	if err := env.Parse(cfg); err != nil {
+		return nil, fmt.Errorf("failed to parse environment variables: %w", err)
 	}
 
-	return sensorData.DellDdvVirtual0.CPU.Temp1Input, nil
+	return &App{
+		base: base,
+		cfg:  cfg,
+	}, nil
 }
 
-func notifyUser(currentTemp float64) error {
-	if currentTemp >= crashTemperature {
-		if err := beeep.Alert(
-			"🔥 CPU Temperature Critical!",
-			fmt.Sprintf("CPU has reached %.1f°C — system will crash soon!", currentTemp),
-			"",
-		); err != nil {
-			return fmt.Errorf("failed to send critical notification: %w", err)
-		}
-
-		return nil
-	}
-
-	if err := beeep.Notify(
-		"⚠ CPU Temperature Alert",
-		fmt.Sprintf("CPU temperature is at %.1f°C — please check your system!", currentTemp),
-		"",
+// Start starts the application.
+func (a *App) Start() error {
+	if err := a.base.Start(
+		web.WithMetricsEnabled(false),
+		web.WithDependencyBootstrap(func(ctx context.Context) error {
+			beeep.AppName = utils.PrettyName(appName)
+			a.alerter = alerts.NewAlerter(
+				logging.LoggerWithComponent(a.base.Logger(), "alerter"),
+			)
+			return nil
+		}),
+		web.WithDependencyBootstrap(func(ctx context.Context) error {
+			a.tempChan, a.errChan = sensors.WatchCPUCoreTemperatureWithContext(ctx, time.Second)
+			if a.tempChan == nil || a.errChan == nil {
+				return errors.New("failed to initialize temperature monitoring channels")
+			}
+			return nil
+		}),
+		web.WithIndefiniteAsyncTask("watch-cpu-core-temperatures", a.watchCPUCoreTemperaturesTask(
+			logging.LoggerWithComponent(a.base.Logger(), "watch-cpu-core-temperatures"),
+		)),
 	); err != nil {
-		return fmt.Errorf("failed to send beep notification: %w", err)
+		return fmt.Errorf("failed to start web app: %w", err)
 	}
-
 	return nil
 }
 
-func shouldNotify(currentTemp, lastTemp, crashTemp float64) bool {
-	if lastTemp == 0 {
-		return false // No previous temperature to compare
-	}
+// Shutdown gracefully shuts down the application.
+func (a *App) Shutdown() {
+	a.base.Shutdown()
+}
 
-	crashWorryThreshold := crashTemp * 0.85 // 85% of crash temperature
-	if currentTemp < crashWorryThreshold {
-		return false // Current temperature is below the threshold for concern
-	}
-
-	// Calculate the threshold for notification
-	threshold := lastTemp * 1.05 // 5% increase from the last temperature
-
-	// Notify if the current temperature is significantly higher than the last recorded temperature
-	return currentTemp > threshold || currentTemp >= crashTemp
+// WaitForEnd blocks until the application is stopped.
+func (a *App) WaitForEnd() {
+	a.base.WaitForEnd(a.Shutdown)
 }
 
 func main() {
-	var lastTemp float64
-	beeep.AppName = appName
-
-	for {
-		temp, err := readCPUTemp()
-		if err != nil {
-			fmt.Printf("Error reading CPU temperature: %v\n", err)
-			return
-		}
-
-		if lastTemp == 0 {
-			lastTemp = temp
-			fmt.Printf("Initial CPU temperature: %.2f°C\n", temp)
-			continue
-		}
-
-		if shouldNotify(temp, lastTemp, crashTemperature) {
-			if err := notifyUser(temp); err != nil {
-				fmt.Printf("Error sending notification: %v\n", err)
-				return
-			}
-		} else {
-			fmt.Printf("CPU temperature is stable: %.2f°C\n", temp)
-		}
-
-		lastTemp = temp
-		time.Sleep(500 * time.Millisecond) // Sleep for 250 milliseconds
+	l := logging.NewLogger(logging.WithAppName(appName))
+	app, err := NewApp(l)
+	if err != nil {
+		l.Error("failed to create app",
+			logging.KeyError, err,
+		)
+		panic(err)
 	}
+
+	if err := app.Start(); err != nil {
+		l.Error("failed to start app",
+			logging.KeyError, err,
+		)
+		panic(err)
+	}
+
+	app.WaitForEnd()
 }

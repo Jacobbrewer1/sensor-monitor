@@ -1,0 +1,19 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "utils",
+    srcs = ["naming.go"],
+    importpath = "github.com/jacobbrewer1/sensor-monitor/pkg/utils",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@org_golang_x_text//cases",
+        "@org_golang_x_text//language",
+    ],
+)
+
+go_test(
+    name = "utils_test",
+    srcs = ["naming_test.go"],
+    embed = [":utils"],
+    deps = ["@com_github_stretchr_testify//require"],
+)

@@ -1,0 +1,16 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "alerts",
+    srcs = [
+        "alert.go",
+        "alerter.go",
+        "notify.go",
+    ],
+    importpath = "github.com/jacobbrewer1/sensor-monitor/pkg/alerts",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_gen2brain_beeep//:beeep",
+        "@com_github_jacobbrewer1_web//logging",
+    ],
+)
