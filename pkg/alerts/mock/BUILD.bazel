@@ -1,0 +1,17 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("//tools/bazel/mock:mock.bzl", "mock")
+
+mock(
+    interfaces = [
+        "Alerter",
+    ],
+    library = "//pkg/alerts",
+)
+
+go_library(
+    name = "mock",
+    srcs = ["mock.gen.go"],
+    importpath = "github.com/jacobbrewer1/sensor-monitor/pkg/alerts/mock",
+    visibility = ["//visibility:public"],
+    deps = ["@org_uber_go_mock//gomock"],
+)

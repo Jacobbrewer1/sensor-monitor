@@ -10,7 +10,7 @@ require (
 	github.com/jacobbrewer1/web v0.0.6
 	github.com/magefile/mage v1.15.0
 	github.com/stretchr/testify v1.10.0
-	go.uber.org/mock v0.5.2
+	go.uber.org/mock v0.4.0
 	golang.org/x/text v0.24.0
 	gopkg.in/yaml.v2 v2.4.0
 )

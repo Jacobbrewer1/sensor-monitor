@@ -24,5 +24,7 @@ write_source_files(
 
 write_source_files(
     name = "gen_mock",
-    additional_update_targets = [],
+    additional_update_targets = [
+        "//pkg/alerts/mock:gen_mock",
+    ],
 )
