@@ -5,7 +5,7 @@ go 1.24
 require (
 	github.com/gen2brain/beeep v0.11.1
 	github.com/magefile/mage v1.15.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	go.uber.org/mock v0.5.2
 	gopkg.in/yaml.v2 v2.4.0
 )

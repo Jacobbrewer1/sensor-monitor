@@ -40,9 +40,10 @@ github.com/sergeymakinen/go-bmp
 ## explicit; go 1.17
 github.com/sergeymakinen/go-ico
 github.com/sergeymakinen/go-ico/internal/icondir
-# github.com/stretchr/testify v1.9.0
+# github.com/stretchr/testify v1.10.0
 ## explicit; go 1.17
 github.com/stretchr/testify/assert
+github.com/stretchr/testify/assert/yaml
 github.com/stretchr/testify/require
 # github.com/tadvi/systray v0.0.0-20190226123456-11a2b8fa57af
 ## explicit
