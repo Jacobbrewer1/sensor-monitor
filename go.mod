@@ -3,7 +3,7 @@ module github.com/jacobbrewer1/sensor-monitor
 go 1.24
 
 require (
-	github.com/gen2brain/beeep v0.11.1
+	github.com/gen2brain/beeep v0.11.2
 	github.com/magefile/mage v1.15.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/mock v0.5.2
